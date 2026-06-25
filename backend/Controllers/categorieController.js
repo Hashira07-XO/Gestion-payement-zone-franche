@@ -1,0 +1,140 @@
+import Categorie from '../Model/categories.js';
+import employeController from './employeController.js';
+
+const { modifierEmployer, supprimerEmploye } = employeController;
+
+const categorieController = {
+    creerCategorie : async (req, res) =>
+    {
+        try
+        {
+            const {
+                libelle,
+                taux_horaire, 
+                heure_deb,
+                heure_fin,
+                type_paie
+            } = req.body;
+
+            console.log(type_paie);
+
+            if (!libelle || !taux_horaire)
+            {
+                return res.status(400).json({ error: "Le matricule et le nom sont obligatoires." });
+            }
+
+            const resultat = await Categorie.createCategorie({
+                libelle: libelle,
+                taux_horaire: taux_horaire,
+                heure_deb: heure_deb,
+                heure_fin: heure_fin,
+                type_paie: type_paie
+            });
+            console.log('insertion de la nouvelle catégorie effectué');
+
+            return res.status(201).json({
+                message: "Nouvelle catégorie insérer!",
+                employeId: resultat.insertId
+            });
+
+        } catch (erreur) {
+            console.error("Erreur dans le contrôleur :", erreur.message);
+            return res.status(500).json({ 
+                error: "Une erreur est survenue lors de la création",
+                details: erreur.message 
+            });
+        }
+        
+    }, 
+    listerCategorie: async (req, res) => {
+        try {
+            const resultat = await Categorie.readCategorie();
+            return res.status(200).json({
+                message: "lecture effectué",
+                resultats: resultat.length,
+                donnees: resultat[0]
+            })
+
+        } catch (error)
+        {
+            console.error("Erreur lors du lecture", error.message);
+            return res.status(500).json({
+                message: "Erreur lors du lecture", 
+                details: error.message
+            })
+        }
+    },
+    modifierCategorie : async (req, res) => {
+        try {
+            const {id_categorie} = req.params;
+            console.log(id_categorie)
+            const {
+                libelle,
+                taux_horaire, 
+                heure_deb,
+                heure_fin,
+                type_paie
+            } = req.body;
+
+            if (!libelle || !taux_horaire)
+            {
+                return res.status(400).json({ error: "Categorie non trouvé" });
+            }
+
+            const resultat = await Categorie.updateCategorie(id_categorie,{
+                libelle: libelle,
+                taux_horaire: taux_horaire,
+                heure_deb: heure_deb,
+                heure_fin: heure_fin,
+                type_paie: type_paie
+            });
+            return res.status(201).json({
+                message: "Catégorie modifiée",
+                employeId: resultat.insertId
+            });
+        } catch(error)
+        {
+            console.error("Erreur du controller", error.message);
+            return res.status(500).json({
+                error: "Une erreur est survenue lors de la modification",
+                details: error.message
+            })
+        }
+    },
+    supprimerCategorie: async (req, res) => {
+        try {
+            const {id_categorie} = req.params;
+            const resultat = await Categorie.deleteCategorie(id_categorie);
+            return res.status(200).json({
+                message: "Catégorie supprimé"
+            });
+        } catch (error)
+        {
+            console.log("Erreur du controller", error.message);
+            res.status(500).json({
+                error: "Une erreur est survenue lors de la supréssion",
+                details: error.message
+            })
+        }
+    },
+    restaurerCategorie : async (req,res) => {
+        try
+        {
+            const {id_categorie} = req.params;
+            const resultat = await Categorie.restoreCategorie(id_categorie);
+            res.status(200).json({
+                message: "Catégorie réstaurer"
+            })
+        } catch (error)
+        {
+            console.error('Erreur dans le controlleur');
+            res.status(500).json({
+                error : "Une erreur est survenue lors de la réstauration",
+                details: error.message
+            })
+        }
+    }
+}
+
+export default categorieController;
+
