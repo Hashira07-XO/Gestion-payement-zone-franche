@@ -1,4 +1,4 @@
-const db = require('../config/database');
+import db from '../config/database.js'
 
 class Categorie {
     constructor(libelle, taux_horaire, heure_deb, heure_fin, type_paie)
@@ -36,7 +36,7 @@ class Categorie {
     static async readCategorie()
     {
         const query = "SELECT * FROM categories";
-        const resultat = db.execute(query);
+        const resultat = db.query(query);
         return resultat;
     }
 
@@ -57,7 +57,7 @@ class Categorie {
             ];
             console.log(values);
 
-            const [resultats] = await db.execute(query, values);
+            const [resultats] = await db.query(query, values);
             return resultats;
 
         } catch (erreur)
@@ -81,4 +81,4 @@ class Categorie {
     }
 }
 
-module.exports = Categorie;
+export default Categorie;

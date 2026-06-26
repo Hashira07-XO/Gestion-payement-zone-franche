@@ -1,5 +1,5 @@
-const db = require('../config/database'); 
-const { update } = require('./employes');
+import db from '../config/database.js';
+import update from './employes.js'
 
 class Pointage {
     static async enregistrerEntree(id_emp, heure_arrivee) {
@@ -100,4 +100,4 @@ class Pointage {
     }
 }
 
-module.exports = Pointage;
+export default Pointage

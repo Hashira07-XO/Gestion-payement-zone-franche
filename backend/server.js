@@ -1,6 +1,3 @@
-// ========================================================
-// MODULE 1 : LES IMPORTS (ES Modules)
-// ========================================================
 import express from 'express';
 import cors from 'cors';       
 import dotenv from 'dotenv';         
@@ -9,8 +6,9 @@ import employeRoutes from './Routes/employeRoutes.js';
 import pointageRoutes from './routes/pointageRoutes.js'; // Attention à la casse "routes/Routes" selon ton dossier
 import categorieRoutes from './Routes/categorieRoutes.js';
 import paieRoutes from './Routes/PaieRoutes.js';
+import authRoutes from './Routes/authRoutes.js';
 
-// Initialisation des variables d'environnement
+
 dotenv.config();
 
 const app = express();
@@ -25,6 +23,7 @@ app.use('/api/employes', employeRoutes);
 app.use('/api/pointages', pointageRoutes);
 app.use('/api/categories', categorieRoutes);
 app.use('/api/paie', paieRoutes);
+app.use('/api/auth', authRoutes);
 
 // Route de base
 app.get('/', (req, res) => {
@@ -34,9 +33,7 @@ app.get('/', (req, res) => {
     });
 });
 
-// ========================================================
-// MODULE 2 : L'ASYNCHRONISME (Le panneau STOP avec async/await)
-// ========================================================
+
 async function startServer() {
     try {
         await db.query('SELECT 1 + 1 AS test_connection');

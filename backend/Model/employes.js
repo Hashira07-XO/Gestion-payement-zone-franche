@@ -1,5 +1,5 @@
 // models/Employe.js
-const db = require('../config/database'); // Remplace par le chemin exact vers ton pool de connexion
+import db from '../config/database.js' // Remplace par le chemin exact vers ton pool de connexion
 
 class Employe {
     constructor(matricule_emp, nom_emp, prenom_emp,cin_emp,date_naiss_emp,sexe_emp,adresse_emp,tel_emp, data_embauche,statut_emp, poste) {
@@ -140,4 +140,4 @@ static async update(id_emp, data) {
     }
 }
 
-module.exports = Employe;
+export default Employe;

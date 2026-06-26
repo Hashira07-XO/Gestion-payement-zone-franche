@@ -1,6 +1,6 @@
 // 1. Importation de mysql2 avec le support des Promises (indispensable pour async/await)
-const mysql = require('mysql2/promise');
-require('dotenv').config();
+import mysql from 'mysql2/promise'
+import 'dotenv/config';
 
 // 2. Structure Singleton pour garantir qu'on ne crée QU'UN SEUL Pool de connexions
 class Database {
@@ -39,4 +39,4 @@ const instance = new Database();
 
 // 4. MODULE 1 : EXPORTATION
 // On exporte directement le Pool pour pouvoir faire "db.query()" n'importe où
-module.exports = instance.getConnection();
+export default instance.getConnection();
