@@ -3,11 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';         
 import db from './config/database.js'; 
 import employeRoutes from './Routes/employeRoutes.js';
-import pointageRoutes from './routes/pointageRoutes.js'; // Attention à la casse "routes/Routes" selon ton dossier
+import pointageRoutes from './routes/pointageRoutes.js'; 
 import categorieRoutes from './Routes/categorieRoutes.js';
 import paieRoutes from './Routes/PaieRoutes.js';
 import authRoutes from './Routes/authRoutes.js';
-
 
 dotenv.config();
 
@@ -15,8 +14,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
-app.use(express.json()); 
 
 // Liaison des routes
 app.use('/api/employes', employeRoutes);
@@ -25,6 +25,9 @@ app.use('/api/categories', categorieRoutes);
 app.use('/api/paie', paieRoutes);
 app.use('/api/auth', authRoutes);
 
+// Rendre le dossier des images accessible publiquement
+app.use('/uploads', express.static('uploads'));
+
 // Route de base
 app.get('/', (req, res) => {
     res.json({ 
@@ -32,7 +35,6 @@ app.get('/', (req, res) => {
         message: "API de Gestion Zone Franche opérationnelle ! Tu as dompté les bases." 
     });
 });
-
 
 async function startServer() {
     try {

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone Franche - Connexion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        corporate: '#041E56',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .spaced-typography {
+            word-spacing: 0.25em;
+            letter-spacing: 0.05em;
+        }
+
+        /* Trame technique animée - Version Subtile Équilibrée */
+        .tech-dot-matrix {
+            background-image: radial-gradient(#041E56 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            animation: matrixPan 35s linear infinite;
+        }
+
+        @keyframes matrixPan {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: 48px 48px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans h-screen flex overflow-hidden">
+
+    <div class="hidden lg:flex lg:w-2/5 bg-corporate p-12 flex-col justify-between text-white select-none">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-white text-corporate flex items-center justify-center font-black tracking-tighter text-sm rounded">
+                ZF
+            </div>
+            <span class="font-bold tracking-widest text-xs uppercase spaced-typography">Zone Franche</span>
+        </div>
+
+        <div class="space-y-6">
+            <span class="inline-block bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded spaced-typography">
+                ERP / Production
+            </span>
+            <h2 class="text-4xl font-light tracking-tight leading-none spaced-typography">
+                Système de <br><span class="font-bold">Pointage & Paie</span>.
+            </h2>
+            <div class="w-12 h-1 bg-blue-500 my-4"></div>
+            <p class="text-blue-200 text-sm max-w-xs font-light leading-relaxed spaced-typography">
+                Interface de contrôle centrale pour terminaux tablettes et traitement analytique des salaires.
+            </p>
+        </div>
+
+        <div class="text-[11px] text-blue-300 font-mono tracking-wider spaced-typography">
+            v2.1.0 // SÉCURISÉ
+        </div>
+    </div>
+
+    <div class="w-full lg:w-3/5 flex items-center justify-center p-6 sm:p-12 bg-white relative">
+        
+        <div class="absolute inset-0 tech-dot-matrix opacity-[0.06] pointer-events-none"></div>
+
+        <div class="w-full max-w-sm space-y-8 relative z-10 bg-white p-6 border border-gray-100 shadow-sm rounded">
+            
+            <div class="space-y-2">
+                <h1 class="text-2xl font-bold text-gray-900 tracking-tight spaced-typography">Authentification</h1>
+                <p class="text-xs text-gray-500 font-light spaced-typography">Accès réservé aux administrateurs de la Zone Franche.</p>
+            </div>
+
+            <div id="error-box" class="hidden bg-red-50 border-2 border-red-200 p-4 text-xs font-medium text-red-800 flex items-center space-x-3 rounded transition-all">
+                <i class="fas fa-ban text-red-600 text-sm"></i>
+                <span id="error-message" class="spaced-typography">Accès refusé. Vérifiez vos accès.</span>
+            </div>
+
+            <form id="login-form" class="space-y-5">
+                <div class="space-y-1.5">
+                    <label for="username" class="text-xs font-bold text-gray-700 uppercase tracking-wider block spaced-typography">Identifiant</label>
+                    <input type="text" id="username" required
+                        class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded text-sm text-gray-900 placeholder-gray-400 focus:border-corporate focus:ring-0 outline-none transition font-mono" 
+                        placeholder="Ex: admin_rh">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="password" class="text-xs font-bold text-gray-700 uppercase tracking-wider block spaced-typography">Mot de passe</label>
+                    <input type="password" id="password" required
+                        class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded text-sm text-gray-900 placeholder-gray-400 focus:border-corporate focus:ring-0 outline-none transition font-mono" 
+                        placeholder="••••••••">
+                </div>
+
+                <button type="submit" id="btn-submit"
+                    class="w-full bg-corporate hover:bg-blue-950 text-white font-bold text-xs uppercase tracking-widest py-4 rounded transition duration-150 flex items-center justify-center space-x-2 spaced-typography">
+                    <span>Valider les accès</span>
+                    <i class="fas fa-chevron-right text-[10px]"></i>
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>

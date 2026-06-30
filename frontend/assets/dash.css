@@ -1,0 +1,92 @@
+/* ===========================
+   SCROLLBAR ROBOTIQUE MATRIX
+=========================== */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #072f87 #e5e7eb;
+}
+
+
+/* Chrome / Edge / Electron */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+
+::-webkit-scrollbar-track {
+    background:
+        linear-gradient(
+            90deg,
+            #f1f5f9,
+            #e2e8f0
+        );
+    border-left: 1px solid #cbd5e1;
+}
+
+
+::-webkit-scrollbar-thumb {
+
+    background:
+        linear-gradient(
+            180deg,
+            #041E56,
+            #2563eb
+        );
+
+    border-radius: 2px;
+
+    border: 2px solid #e5e7eb;
+
+    box-shadow:
+        0 0 8px rgba(37,99,235,.6);
+
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+
+    background:
+        linear-gradient(
+            180deg,
+            #2563eb,
+            #041E56
+        );
+
+    box-shadow:
+        0 0 15px rgba(37,99,235,.9);
+
+}
+
+
+
+/* effet lignes digitales */
+
+::-webkit-scrollbar-corner {
+    background:#e5e7eb;
+}
+
+
+
+/* scrollbar interne des tableaux */
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height:6px;
+}
+
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+
+    background:
+    repeating-linear-gradient(
+        45deg,
+        #041E56,
+        #041E56 4px,
+        #2563eb 4px,
+        #2563eb 8px
+    );
+
+}

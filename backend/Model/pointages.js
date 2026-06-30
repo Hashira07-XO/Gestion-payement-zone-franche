@@ -98,6 +98,37 @@ class Pointage {
             throw error;
         }
     }
+    
+    static async pointageDuJour() 
+        {
+            const dateAujourdhui = new Date().toISOString().slice(0, 10);
+
+            const query = `
+                SELECT 
+                    p.id_pointage, 
+                    e.matricule_emp, 
+                    e.nom_emp, 
+                    e.prenom_emp, 
+                    p.heure_deb_eff, 
+                    p.heure_fin_eff,
+                    p.duree_travail_min ,
+                    p.retard_min,
+                    p.heures_sup_min
+                FROM pointages p
+                JOIN employes e ON p.id_emp = e.id_emp
+                WHERE p.date_pointage = ?
+                ORDER BY p.heure_deb_eff DESC
+            `;
+
+            try {
+
+                const [rows] = await db.execute(query, [dateAujourdhui]);
+                return rows;
+            } catch (error) {
+                console.error("Erreur dans pointageDuJour :", error);
+                throw error;
+            }
+        }
 }
 
-export default Pointage
+export default Pointage;

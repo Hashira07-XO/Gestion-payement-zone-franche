@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/dash.css">
+    <title>Zone Franche - Dashboard Matrix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        corporate: '#041E56', // Bleu Navy Principal
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .spaced-typography {
+            word-spacing: 0.25em;
+            letter-spacing: 0.08em;
+        }
+        
+        /* Trame technique robotique */
+        .tech-dot-matrix {
+            background-image: radial-gradient(#041E56 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            animation: matrixPan 35s linear infinite;
+        }
+
+        @keyframes matrixPan {
+            from { background-position: 0 0; }
+            to { background-position: 48px 48px; }
+        }
+
+        /* STYLES DE SCROLLBAR */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #020d24;
+            border-left: 1px solid #041E56;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #041E56;
+            border: 1px solid #00d2ff;
+            border-radius: 0px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #00d2ff;
+            box-shadow: 0 0 10px #00d2ff;
+        }
+
+        /* FORCE L'IMPRESSION DES COULEURS POUR LE BADGE */
+        @media print {
+            body {
+                visibility: hidden !important;
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            #print-zone-target, #print-zone-target * {
+                visibility: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            #print-zone-target {
+                position: absolute !important;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: auto !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            #print-zone-target button {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans h-screen flex overflow-hidden text-gray-900">
+
+    <aside class="w-64 bg-corporate text-white flex flex-col justify-between p-6 select-none shrink-0 border-r-2 border-blue-950 z-20">
+        <div class="space-y-8">
+            <div class="flex items-center space-x-3 border-b border-blue-900 pb-5">
+                <div class="w-7 h-7 bg-white text-corporate flex items-center justify-center font-black text-xs rounded-sm">
+                    ZF
+                </div>
+                <span class="font-bold tracking-widest text-xs uppercase spaced-typography">Zone Franche</span>
+            </div>
+
+            <nav class="space-y-1" id="sidebar-nav">
+                <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest block mb-3 spaced-typography">Navigation //</span>
+                
+                <a href="#" id="nav-dashboard" class="nav-item flex items-center space-x-3 bg-blue-950 text-white px-3 py-3 rounded-sm text-xs uppercase tracking-wider font-medium transition border-l-4 border-blue-500">
+                    <i class="fas fa-chart-bar text-xs w-4"></i>
+                    <span class="spaced-typography">Tableau de bord</span>
+                </a>
+
+                <a href="#" id="nav-employees" class="nav-item flex items-center space-x-3 text-blue-200 hover:bg-blue-950 hover:text-white px-3 py-3 rounded-sm text-xs uppercase tracking-wider font-medium transition border-l-4 border-transparent hover:border-blue-400">
+                    <i class="fas fa-users text-xs w-4"></i>
+                    <span class="spaced-typography">Employés</span>
+                </a>
+
+                <a href="#" id="nav-categories" class="nav-item flex items-center space-x-3 text-blue-200 hover:bg-blue-950 hover:text-white px-3 py-3 rounded-sm text-xs uppercase tracking-wider font-medium transition border-l-4 border-transparent hover:border-blue-400">
+                    <i class="fas fa-tags text-xs w-4"></i>
+                    <span class="spaced-typography">Catégories</span>
+                </a>
+                
+                <a href="#" id="nav-pointages" class="nav-item flex items-center space-x-3 text-blue-200 hover:bg-blue-950 hover:text-white px-3 py-3 rounded-sm text-xs uppercase tracking-wider font-medium transition border-l-4 border-transparent hover:border-blue-400">
+                    <i class="fas fa-user-check text-xs w-4"></i>
+                    <span class="spaced-typography">Pointages</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="border-t border-blue-900 pt-4">
+            <button id="btn-logout" class="w-full flex items-center space-x-3 text-red-400 hover:bg-red-950/30 px-3 py-2.5 rounded-sm text-xs uppercase tracking-widest font-bold transition">
+                <i class="fas fa-power-off text-xs"></i>
+                <span class="spaced-typography">Déconnexion</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+        
+        <header class="h-20 bg-white border-b-2 border-gray-200 flex items-center justify-between px-8 shrink-0 z-10">
+            <div>
+                <h1 id="main-title" class="text-xl font-bold tracking-tight uppercase text-gray-900 spaced-typography">Console de Contrôle</h1>
+                <p id="main-subtitle" class="text-[10px] text-gray-400 uppercase font-mono tracking-wider">Statut système : en ligne // Analyse en temps réel</p>
+            </div>
+
+            <div class="flex items-center space-x-4 font-mono text-xs text-gray-600 bg-gray-50 border border-gray-200 px-4 py-2 rounded-sm">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span id="admin-name" class="font-bold text-gray-900">ADMIN_RH</span>
+            </div>
+        </header>
+
+        <div class="flex-1 p-8 relative bg-gray-50 overflow-hidden flex flex-col">
+            
+            <div class="absolute inset-0 tech-dot-matrix opacity-[0.06] pointer-events-none"></div>
+
+            <div id="view-dashboard-content" class="relative z-10 space-y-8 flex flex-col h-full overflow-hidden">
+                <section class="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
+                    <div class="bg-white border-2 border-gray-200 p-6 rounded-sm flex flex-col justify-between h-32 shadow-sm">
+                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wider spaced-typography">Effectif Présent //</div>
+                        <div class="text-4xl font-light font-mono text-gray-900 mt-2" id="kpi-attendance">15</div>
+                        <div class="text-[10px] text-emerald-600 font-mono mt-2 bg-emerald-50 border border-emerald-200 px-2 py-0.5 self-start rounded-sm">Synchronisé</div>
+                    </div>
+                    <div class="bg-white border-2 border-gray-200 p-6 rounded-sm flex flex-col justify-between h-32 shadow-sm">
+                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wider spaced-typography">Paie Globale //</div>
+                        <div class="text-4xl font-bold font-mono text-corporate mt-2">-- Ar</div>
+                        <div class="text-[10px] text-gray-500 font-mono mt-2 bg-gray-100 border border-gray-200 px-2 py-0.5 self-start rounded-sm">Moteur actif</div>
+                    </div>
+                    <div class="bg-white border-2 border-gray-200 p-6 rounded-sm flex flex-col justify-between h-32 shadow-sm">
+                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wider spaced-typography">Anomalies //</div>
+                        <div class="text-4xl font-light font-mono text-red-600 mt-2">1</div>
+                        <div class="text-[10px] text-red-600 font-mono mt-2 bg-red-50 border border-red-200 px-2 py-0.5 self-start rounded-sm">Action requise</div>
+                    </div>
+                </section>
+
+                <section class="bg-white border-2 border-gray-200 rounded-sm overflow-hidden shadow-sm flex flex-col flex-1 min-h-0">
+                    <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0">
+                        <div class="text-xs font-bold text-gray-900 uppercase tracking-wider spaced-typography">Flux de pointage en direct // Matrice des Entrées</div>
+                    </div>
+                    <div class="overflow-x-auto overflow-y-auto flex-1 bg-white scrollbar-thin">
+                        <table class="w-full text-left border-collapse font-mono text-xs min-w-[900px]">
+                            <thead class="sticky top-0 z-20 text-gray-600 uppercase text-[10px] border-b-2 border-gray-200 tracking-wider bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-6 font-bold">ID Log</th>
+                                    <th class="py-3 px-6 font-bold">Code Matricule</th>
+                                    <th class="py-3 px-6 font-bold">Employé</th>
+                                    <th class="py-3 px-6 font-bold">Intervalle Actif</th>
+                                    <th class="py-3 px-6 font-bold">Temps (Min)</th>
+                                    <th class="py-3 px-6 text-right font-bold">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 text-gray-800 bg-white" id="pointage-table-body">
+                                <tr><td colspan="6" class="py-4 text-center text-gray-400 font-mono">Aucun pointage aujourd'hui //</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div id="view-employees-content" class="relative z-10 space-y-6 hidden flex flex-col h-full overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 border-2 border-gray-200 rounded-sm shadow-sm shrink-0">
+                    <div class="relative w-full md:w-96 font-mono text-xs">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-search"></i></span>
+                        <input type="text" id="employee-search-input" placeholder="RECHERCHER UN AGENT..." class="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-sm bg-gray-50 font-bold uppercase tracking-wider text-corporate focus:border-corporate focus:outline-none">
+                    </div>
+                    <button id="btn-trigger-form" class="w-full md:w-auto bg-corporate hover:bg-opacity-90 text-white font-mono text-xs uppercase font-bold tracking-widest px-4 py-2.5 rounded-sm shadow-sm transition">
+                        [ + ] Enregistrer Nouvel Employé //
+                    </button>
+                </div>
+
+                <div id="form-container" class="bg-white border-2 border-gray-200 p-6 rounded-sm shadow-md hidden shrink-0 overflow-y-auto max-h-[400px] scrollbar-thin">
+                    <div class="text-xs font-bold text-gray-900 uppercase tracking-wider font-mono border-b border-gray-200 pb-3 mb-4 flex justify-between items-center">
+                        <span id="form-mode-title">Enrôlement Agent // Données d'identification</span>
+                    </div>
+                    <form id="form-employe" class="space-y-4 font-mono text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Code Matricule *</label>
+                                <input type="text" id="matricule_emp" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 font-bold text-corporate focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Nom de famille *</label>
+                                <input type="text" id="nom_emp" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Prénom *</label>
+                                <input type="text" id="prenom_emp" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Numéro CIN *</label>
+                                <input type="text" id="cin_emp" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Date de Naissance *</label>
+                                <input type="date" id="date_naiss_emp" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Sexe *</label>
+                                <select id="sexe_emp" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none h-[38px]">
+                                    <option value="M">Masculin (M)</option>
+                                    <option value="F">Féminin (F)</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Adresse *</label>
+                                <input type="text" id="adresse_emp" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Téléphone *</label>
+                                <input type="text" id="tel_emp" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Catégorie *</label>
+                                <select id="id_categorie" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none h-[38px]">
+                                    <option value="" disabled selected>Chargement...</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Statut Initial *</label>
+                                <select id="statut_emp" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none h-[38px]">
+                                    <option value="Actif">Actif</option>
+                                    <option value="En congé">En congé</option>
+                                    <option value="Licencié">Licencié</option>
+                                    <option value="evaluation">evaluation</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col col-span-1 md:col-span-2">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Photo de l'agent (.jpg, .png)</label>
+                                <input type="file" id="photo_emp" accept="image/*" class="border border-gray-300 p-1.5 rounded-sm bg-gray-50 focus:border-corporate focus:outline-none text-[11px]">
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-2 pt-2">
+                            <button type="button" id="btn-cancel-form" class="border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-sm">Annuler</button>
+                            <button type="submit" id="btn-submit-form" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 font-bold tracking-wider rounded-sm">Enregistrer l'Agent</button>
+                        </div>
+                    </form>
+                </div>
+
+                <section class="bg-white border-2 border-gray-200 rounded-sm overflow-hidden shadow-sm flex flex-col flex-1 min-h-0">
+                    <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 shrink-0">
+                        <div class="text-xs font-bold text-gray-900 uppercase tracking-wider font-mono">Registre Central des Agents Actifs</div>
+                    </div>
+                    <div class="overflow-x-auto overflow-y-auto max-h-[355px] scrollbar-thin flex-1">
+                        <table class="w-full text-left border-collapse font-mono text-xs min-w-[1150px]">
+                            <thead class="sticky top-0 z-20 text-gray-600 uppercase text-[10px] border-b-2 border-gray-200 tracking-wider bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-6 font-bold">ID</th>
+                                    <th class="py-3 px-6 font-bold">Matricule</th>
+                                    <th class="py-3 px-6 font-bold">Employé</th>
+                                    <th class="py-3 px-6 font-bold">CIN</th>
+                                    <th class="py-3 px-6 font-bold">Catégorie</th>
+                                    <th class="py-3 px-6 font-bold">Statut</th>
+                                    <th class="py-3 px-6 text-center font-bold w-96">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 text-gray-800 bg-white" id="employees-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div id="view-categories-content" class="relative z-10 space-y-6 hidden flex flex-col h-full overflow-hidden">
+                <div class="flex justify-end items-center bg-white p-4 border-2 border-gray-200 rounded-sm shadow-sm shrink-0">
+                    <button id="btn-trigger-category-form" class="bg-corporate hover:bg-opacity-90 text-white font-mono text-xs uppercase font-bold tracking-widest px-4 py-2.5 rounded-sm shadow-sm transition">
+                        [ + ] Nouvelle Catégorie //
+                    </button>
+                </div>
+
+                <div id="category-form-container" class="bg-white border-2 border-gray-200 p-6 rounded-sm shadow-md hidden animate-fade-in shrink-0">
+                    <div class="text-xs font-bold text-gray-900 uppercase tracking-wider font-mono border-b border-gray-200 pb-3 mb-4">
+                        <span id="category-form-mode-title">Configuration Nouvelle Catégorie // Matrice Métier</span>
+                    </div>
+                    <form id="form-category" class="space-y-4 font-mono text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Libellé (Poste) *</label>
+                                <input type="text" id="libelle" required placeholder="ex: Comptable" class="border border-gray-300 p-2 rounded-sm bg-gray-50 font-bold focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Taux Horaire *</label>
+                                <input type="number" id="taux_horaire" required placeholder="ex: 5000" class="border border-gray-300 p-2 rounded-sm bg-gray-50 font-bold focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Heure Début (hh:mm:ss) *</label>
+                                <input type="text" id="heure_deb" required placeholder="08:00:00" class="border border-gray-300 p-2 rounded-sm bg-gray-50 font-bold focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Heure Fin (hh:mm:ss) *</label>
+                                <input type="text" id="heure_fin" required placeholder="17:00:00" class="border border-gray-300 p-2 rounded-sm bg-gray-50 font-bold focus:border-corporate focus:outline-none">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase text-gray-500 mb-1">Type Paie *</label>
+                                <select id="type_paie" required class="border border-gray-300 p-2 rounded-sm bg-gray-50 font-bold text-gray-700 focus:border-corporate focus:outline-none h-[38px]">
+                                    <option value="Ouvrier">Ouvrier</option>
+                                    <option value="Cadre">Cadre</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-2 pt-2">
+                            <button type="button" id="btn-cancel-category-form" class="border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-sm">Annuler</button>
+                            <button type="submit" id="btn-submit-category-form" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 font-bold tracking-wider rounded-sm">Enregistrer la Catégorie //</button>
+                        </div>
+                    </form>
+                </div>
+
+                <section class="bg-white border-2 border-gray-200 rounded-sm overflow-hidden shadow-sm flex flex-col flex-1 min-h-0">
+                    <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 shrink-0">
+                        <div class="text-xs font-bold text-gray-900 uppercase tracking-wider font-mono">Classification des Postes // Grille Métier Sectorielle</div>
+                    </div>
+                    <div class="overflow-x-auto overflow-y-auto max-h-[450px] scrollbar-thin flex-1 bg-white">
+                        <table class="w-full text-left border-collapse font-mono text-xs">
+                            <thead class="sticky top-0 z-20 text-gray-600 uppercase text-[10px] border-b-2 border-gray-200 tracking-wider bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-4 font-bold border border-gray-300">id_categorie</th>
+                                    <th class="py-3 px-4 font-bold border border-gray-300">libelle_cat</th>
+                                    <th class="py-3 px-4 font-bold border border-gray-300">taux_horaire_base</th>
+                                    <th class="py-3 px-4 font-bold border border-gray-300">heure_deb_prev</th>
+                                    <th class="py-3 px-4 font-bold border border-gray-300">heure_fin_prev</th>
+                                    <th class="py-3 px-4 font-bold border border-gray-300">type_paie</th>
+                                    <th class="py-3 px-4 text-center font-bold border border-gray-300 w-48">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 text-gray-800 bg-white" id="categories-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="badge-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div id="print-zone-target" class="flex flex-col items-center p-4">
+            <div class="w-72 h-[450px] bg-white border-2 border-corporate rounded-sm shadow-2xl flex flex-col justify-between font-mono relative overflow-hidden">
+                <div class="h-1 bg-emerald-500 w-full"></div>
+                <div class="bg-corporate text-white text-center py-4 border-b border-blue-950">
+                    <div class="text-sm font-black tracking-widest">ZONE FRANCHE</div>
+                    <div class="text-[8px] text-emerald-400 font-bold tracking-widest mt-0.5">SÉCURITÉ // PRO-ID MATRIX</div>
+                </div>
+                <div class="flex flex-col items-center justify-around flex-grow p-4 text-center space-y-2">
+                    <div id="badge-photo-container" class="w-20 h-20 bg-gray-100 border border-gray-300 flex items-center justify-center relative overflow-hidden">
+                        <span id="badge-photo-placeholder" class="text-[9px] text-gray-400 font-bold">PHOTO_SRC</span>
+                        <img id="badge-photo-img" src="" class="w-full h-full object-cover hidden" alt="Photo Agent">
+                        <div class="absolute top-0 right-0 w-1.5 h-1.5 bg-emerald-500"></div>
+                    </div>
+                    <div class="space-y-0.5 w-full">
+                        <div id="badge-target-name" class="text-sm font-black text-gray-900 uppercase truncate">-- --</div>
+                        <div id="badge-target-cat" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider truncate">--</div>
+                        <div class="flex justify-center items-center gap-1.5 mt-1.5">
+                            <div class="bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-sm">
+                                <span id="badge-target-matricule" class="text-[9px] text-corporate font-black">--</span>
+                            </div>
+                            <div id="badge-target-statut-pill" class="border px-2 py-0.5 rounded-sm text-[9px] font-black uppercase">--</div>
+                        </div>
+                    </div>
+                    <div class="p-1.5 border border-gray-200 bg-white shadow-sm">
+                        <div id="badge-qrcode-area" class="w-20 h-20 flex items-center justify-center"></div>
+                    </div>
+                </div>
+                <div class="bg-corporate text-white text-center py-2 border-t border-blue-950">
+                    <span class="text-[8px] tracking-widest uppercase font-bold">ZF-SYSTEM-AUTHORIZED</span>
+                </div>
+            </div>
+            <div class="flex space-x-2 mt-4">
+                <button id="btn-close-badge" class="bg-gray-800 text-white font-mono text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-sm hover:bg-gray-700">Fermer</button>
+                <button onclick="window.print()" class="bg-emerald-600 text-white font-mono text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-sm hover:bg-emerald-700">Imprimer le Badge</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="details-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white border-2 border-corporate rounded-sm shadow-2xl w-full max-w-lg p-6 font-mono text-xs relative">
+            <div class="border-b-2 border-gray-200 pb-3 mb-4 flex justify-between items-center">
+                <h3 class="text-xs font-bold text-corporate uppercase tracking-wider">Fiche Signalétique Agent //</h3>
+                <button id="btn-close-details-x" class="text-gray-400 hover:text-gray-600 font-bold text-base">&times;</button>
+            </div>
+            <div class="grid grid-cols-3 gap-4 bg-gray-50 p-4 border border-gray-200 rounded-sm" id="details-modal-body"></div>
+            <div class="flex justify-end mt-5 pt-3 border-t border-gray-200">
+                <button id="btn-close-details" class="bg-corporate text-white font-mono text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-sm hover:bg-opacity-90">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let localEmployeesList = []; 
+        let localCategoriesList = [];
+        let currentEditId = null; 
+        let currentCategoryEditId = null; 
+        
+        // Variables tampons pour préserver les métadonnées lors d'un Edit
+        let currentEditDateEmbauche = null;
+        let currentEmployeePhotoBase64 = "";
+
+        const navDashboard = document.getElementById('nav-dashboard');
+        const navEmployees = document.getElementById('nav-employees');
+        const navCategories = document.getElementById('nav-categories');
+        
+        const viewDashboard = document.getElementById('view-dashboard-content');
+        const viewEmployees = document.getElementById('view-employees-content');
+        const viewCategories = document.getElementById('view-categories-content');
+        
+        const mainTitle = document.getElementById('main-title');
+        const mainSubtitle = document.getElementById('main-subtitle');
+
+        const btnTriggerForm = document.getElementById('btn-trigger-form');
+        const btnCancelForm = document.getElementById('btn-cancel-form');
+        const formContainer = document.getElementById('form-container');
+        const formEmploye = document.getElementById('form-employe');
+        const formModeTitle = document.getElementById('form-mode-title');
+        const btnSubmitForm = document.getElementById('btn-submit-form');
+        
+        const badgeModal = document.getElementById('badge-modal');
+        const btnCloseBadge = document.getElementById('btn-close-badge');
+        const detailsModal = document.getElementById('details-modal');
+        const btnCloseDetails = document.getElementById('btn-close-details');
+        const btnCloseDetailsX = document.getElementById('btn-close-details-x');
+        
+        const inputMatricule = document.getElementById('matricule_emp');
+        const selectCategorie = document.getElementById('id_categorie');
+        const selectStatut = document.getElementById('statut_emp');
+        const searchInput = document.getElementById('employee-search-input');
+        const inputPhotoEmp = document.getElementById('photo_emp');
+
+        // Formulaires Catégorie
+        const btnTriggerCategoryForm = document.getElementById('btn-trigger-category-form');
+        const btnCancelCategoryForm = document.getElementById('btn-cancel-category-form');
+        const categoryFormContainer = document.getElementById('category-form-container');
+        const formCategory = document.getElementById('form-category');
+        const categoryFormModeTitle = document.getElementById('category-form-mode-title');
+        const btnSubmitCategoryForm = document.getElementById('btn-submit-category-form');
+        
+        const inputLibelleCat = document.getElementById('libelle');
+        const inputTauxHoraireCat = document.getElementById('taux_horaire');
+        const inputHeureDebCat = document.getElementById('heure_deb');
+        const inputHeureFinCat = document.getElementById('heure_fin');
+        const selectTypePaieCat = document.getElementById('type_paie');
+
+        function getStatusColorClass(status) {
+            switch(status) {
+                case 'Actif': return "bg-emerald-50 text-emerald-700 border-emerald-200";
+                case 'En congé': return "bg-amber-50 text-amber-700 border-amber-200";
+                case 'Licencié': return "bg-red-50 text-red-700 border-red-200";
+                case 'evaluation': return "bg-purple-50 text-purple-700 border-purple-200";
+                default: return "bg-gray-50 text-gray-700 border-gray-200";
+            }
+        }
+
+        function generateNextMatricule() {
+            let maxIndex = 14; 
+            localEmployeesList.forEach(emp => {
+                const mat = emp.matricule_emp || '';
+                if (mat.startsWith('EMP-2026-')) {
+                    const suffixStr = mat.replace('EMP-2026-', '');
+                    const suffixNum = parseInt(suffixStr, 10);
+                    if (!isNaN(suffixNum) && suffixNum > maxIndex) maxIndex = suffixNum;
+                }
+            });
+            inputMatricule.value = `EMP-2026-${String(maxIndex + 1).padStart(3, '0')}`;
+        }
+
+        // Écouteur de fichier pour la conversion Base64 en direct
+        inputPhotoEmp.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentEmployeePhotoBase64 = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // --- SECTION CATÉGORIES (AVEC LA NOUVELLE SYSTEM-ROUTE DE RESTAURATION) ---
+        
+        function fetchCategoriesList() {
+            return fetch('http://localhost:3005/api/categories/')
+                .then(res => {
+                    if (!res.ok) throw new Error();
+                    return res.json();
+                })
+                .then(apiData => {
+                    localCategoriesList = apiData.donnees || apiData;
+                    selectCategorie.innerHTML = "";
+                    localCategoriesList.forEach(cat => {
+                        if (cat.existe !== 0) {
+                            const option = document.createElement('option');
+                            option.value = cat.id_categorie;
+                            option.textContent = cat.libelle_cat || 'Sans libellé';
+                            selectCategorie.appendChild(option);
+                        }
+                    });
+                    renderCategoriesTable();
+                })
+                .catch(err => {
+                    selectCategorie.innerHTML = `<option value="" disabled>Échec chargement API Catégories</option>`;
+                });
+        }
+
+        function renderCategoriesTable() {
+            const catTableBody = document.getElementById('categories-table-body');
+            if(!catTableBody) return;
+            catTableBody.innerHTML = "";
+            
+            if (localCategoriesList.length === 0) {
+                catTableBody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-gray-400">Aucune ligne trouvée //</td></tr>`;
+                return;
+            }
+            
+            localCategoriesList.forEach(cat => {
+                const row = document.createElement('tr');
+                
+                const id = cat.id_categorie;
+                const libelle = cat.libelle_cat || '';
+                const taux = cat.taux_horaire_base !== undefined ? cat.taux_horaire_base : '0.00';
+                const hdeb = cat.heure_deb_prev || '00:00:00';
+                const hfin = cat.heure_fin_prev || '00:00:00';
+                const tpaie = cat.type_paie || 'Ouvrier';
+                const existe = cat.existe !== undefined ? cat.existe : 1;
+
+                if (existe === 0) {
+                    row.className = "bg-gray-100/70 text-gray-400 transition border-b border-gray-200 font-mono text-[11px] italic";
+                } else {
+                    row.className = "hover:bg-slate-50 transition border-b border-gray-100 font-mono text-[11px]";
+                }
+
+                let actionBoutonSecondaire = '';
+                if (existe === 0) {
+                    actionBoutonSecondaire = `
+                        <button type="button" onclick="restoreCategory(${id}, '${libelle.replace(/'/g, "\\'")}')" title="Restaurer" class="text-emerald-600 hover:text-emerald-700 font-bold border border-emerald-200 px-2 py-0.5 rounded-sm bg-emerald-50 hover:bg-emerald-100 text-[10px]">
+                            <i class="fas fa-undo-alt"></i> Restaurer
+                        </button>
+                    `;
+                } else {
+                    actionBoutonSecondaire = `
+                        <button type="button" onclick="deleteCategory(${id})" title="Archiver" class="text-red-600 hover:text-red-700 font-bold border border-red-200 px-2 py-0.5 rounded-sm bg-red-50/50 hover:bg-red-50 text-[10px]">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    `;
+                }
+
+                row.innerHTML = `
+                    <td class="py-2.5 px-4 border border-gray-200 text-center font-bold">${id}</td>
+                    <td class="py-2.5 px-4 border border-gray-200 font-sans font-bold ${existe !== 0 ? 'text-gray-700' : 'text-gray-400'}">${libelle}</td>
+                    <td class="py-2.5 px-4 border border-gray-200 text-right">${parseFloat(taux).toFixed(2)}</td>
+                    <td class="py-2.5 px-4 border border-gray-200 text-center">${hdeb}</td>
+                    <td class="py-2.5 px-4 border border-gray-200 text-center">${hfin}</td>
+                    <td class="py-2.5 px-4 border border-gray-200">${tpaie}</td>
+                    <td class="py-2.5 px-4 border border-gray-200 text-center space-x-1 whitespace-nowrap font-sans">
+                        <button type="button" onclick="initiateCategoryUpdate(${id}, '${libelle.replace(/'/g, "\\'")}', ${taux}, '${hdeb}', '${hfin}', '${tpaie}')" class="text-blue-600 hover:text-blue-700 font-bold border border-blue-200 px-2 py-0.5 rounded-sm bg-blue-50/50 hover:bg-blue-50 text-[10px]">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        ${actionBoutonSecondaire}
+                    </td>
+                `;
+                catTableBody.appendChild(row);
+            });
+        }
+
+        formCategory.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const payload = {
+                libelle: inputLibelleCat.value,
+                taux_horaire: parseInt(inputTauxHoraireCat.value, 10),
+                heure_deb: inputHeureDebCat.value,
+                heure_fin_prev: inputHeureFinCat.value,
+                type_paie: selectTypePaieCat.value
+            };
+
+            if (currentCategoryEditId !== null) {
+                modifierCatBackend(currentCategoryEditId, payload);
+            } else {
+                insererCatBackend(payload);
+            }
+        });
+
+        function insererCatBackend(payload) {
+            fetch('http://localhost:3005/api/categories/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => { if(!res.ok) throw new Error(); return res.json(); })
+            .then(() => {
+                categoryFormContainer.classList.add('hidden');
+                formCategory.reset();
+                fetchCategoriesList();
+            })
+            .catch(err => alert(`Erreur lors de l'insertion.`));
+        }
+
+        function modifierCatBackend(id, payload) {
+            fetch(`http://localhost:3005/api/categories/modify/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => { if(!res.ok) throw new Error(); return res.json(); })
+            .then(() => {
+                categoryFormContainer.classList.add('hidden');
+                formCategory.reset();
+                currentCategoryEditId = null;
+                fetchCategoriesList();
+            })
+            .catch(err => alert(`Erreur lors de la mise à jour.`));
+        }
+
+        function deleteCategory(id) {
+            if (confirm(`Voulez-vous désactiver la catégorie ID #${id} ?`)) {
+                fetch(`http://localhost:3005/api/categories/delete/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+                .then(() => fetchCategoriesList())
+                .catch(err => alert(`Erreur de désactivation.`));
+            }
+        }
+
+        // UTILISATION DE LA ROUTE RESTORE DÉDIÉE DEMANDÉE
+        function restoreCategory(id, libelle) {
+            if (confirm(`Voulez-vous restaurer et réactiver la catégorie "${libelle}" ?`)) {
+                fetch(`http://localhost:3005/api/categories/restore/:${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => { if (!res.ok) throw new Error(); alert (res.json()); })
+                .then(() => fetchCategoriesList())
+                .catch(err => alert(`Erreur lors de la restauration via /restore/:id_categorie`));
+            }
+        }
+
+        btnTriggerCategoryForm.addEventListener('click', () => {
+            currentCategoryEditId = null; formCategory.reset();
+            categoryFormModeTitle.innerText = "Configuration Nouvelle Catégorie // Matrice Métier";
+            btnSubmitCategoryForm.innerText = "Enregistrer la Catégorie //";
+            categoryFormContainer.classList.remove('hidden');
+        });
+
+        btnCancelCategoryForm.addEventListener('click', () => { categoryFormContainer.classList.add('hidden'); currentCategoryEditId = null; });
+
+        function initiateCategoryUpdate(id, libelle, taux, hdeb, hfin, tpaie) {
+            currentCategoryEditId = id;
+            inputLibelleCat.value = libelle;
+            inputTauxHoraireCat.value = parseInt(taux);
+            inputHeureDebCat.value = hdeb.trim();
+            inputHeureFinCat.value = hfin.trim();
+            selectTypePaieCat.value = tpaie;
+            
+            categoryFormModeTitle.innerText = `Modification Catégorie Technique // ID: ${id}`;
+            btnSubmitCategoryForm.innerText = "Mettre à jour la Catégorie //";
+            categoryFormContainer.classList.remove('hidden');
+        }
+
+
+        // --- SECTION EMPLOYÉS (AVEC PHOTO ET CONSERVATION DATE D'EMBAUCHE) ---
+
+        formEmploye.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const selectedText = selectCategorie.options[selectCategorie.selectedIndex].text;
+            const finalStatus = selectStatut.value;
+            
+            // Si modification -> On conserve l'ancienne date, sinon -> Date courante
+            const finalHireDate = (currentEditId !== null) 
+                ? currentEditDateEmbauche 
+                : new Date().toISOString().split('T')[0];
+
+            const payload = {
+                matricule_emp: inputMatricule.value,
+                nom_emp: document.getElementById('nom_emp').value.toUpperCase(),
+                prenom_emp: document.getElementById('prenom_emp').value,
+                cin_emp: document.getElementById('cin_emp').value,
+                date_naiss_emp: document.getElementById('date_naiss_emp').value,
+                sexe_emp: document.getElementById('sexe_emp').value,
+                adresse_emp: document.getElementById('adresse_emp').value,
+                tel_emp: document.getElementById('tel_emp').value,
+                date_embauche: finalHireDate, 
+                statut_emp: finalStatus,
+                id_categorie: selectCategorie.value,
+                photo_emp: currentEmployeePhotoBase64 // Injecté en Base64
+            };
+
+            if (currentEditId !== null) {
+                modifierEmployeBackend(currentEditId, payload, selectedText, finalStatus);
+            } else {
+                insererEmployeBackend(payload, selectedText, finalStatus);
+            }
+        });
+
+        function insererEmployeBackend(payload, selectedText, finalStatus) {
+            fetch('http://localhost:3005/api/employes/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => { if(!res.ok) throw new Error(); return res.json(); })
+            .then(() => {
+                formContainer.classList.add('hidden');
+                generateBadge(payload.matricule_emp, `${payload.nom_emp} ${payload.prenom_emp}`, selectedText, finalStatus, payload.photo_emp);
+                formEmploye.reset();
+                inputPhotoEmp.value = "";
+                currentEmployeePhotoBase64 = "";
+                fetchEmployeesList(); 
+            })
+            .catch(err => alert(`Erreur d'insertion de l'agent.`));
+        }
+
+        function modifierEmployeBackend(id, payload, selectedText, finalStatus) {
+            fetch(`http://localhost:3005/api/employes/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => { if(!res.ok) throw new Error(); return res.json(); })
+            .then(() => {
+                formContainer.classList.add('hidden');
+                generateBadge(payload.matricule_emp, `${payload.nom_emp} ${payload.prenom_emp}`, selectedText, finalStatus, payload.photo_emp);
+                formEmploye.reset();
+                inputPhotoEmp.value = "";
+                currentEmployeePhotoBase64 = "";
+                currentEditId = null; 
+                inputMatricule.removeAttribute('disabled');
+                fetchEmployeesList(); 
+            })
+            .catch(err => alert(`Erreur de modification de l'agent.`));
+        }
+
+        function fetchEmployeesList() {
+            fetch('http://localhost:3005/api/employes/')
+                .then(res => res.json())
+                .then(apiData => {
+                    localEmployeesList = apiData.donnees || apiData; 
+                    renderTableRows();
+                })
+                .catch(err => console.error("Erreur API"));
+        }
+
+        function renderTableRows(filterQuery = "") {
+            const tableBody = document.getElementById('employees-table-body');
+            tableBody.innerHTML = "";
+
+            const filteredList = localEmployeesList.filter(emp => {
+                const nom = (emp.nom_emp || "").toLowerCase();
+                const prenom = (emp.prenom_emp || "").toLowerCase();
+                const matricule = (emp.matricule_emp || "").toLowerCase();
+                return nom.includes(filterQuery) || prenom.includes(filterQuery) || matricule.includes(filterQuery);
+            });
+
+            filteredList.forEach(emp => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition border-b border-gray-100";
+                
+                const empId = emp.id_emp || emp.id;
+                const currentStatus = emp.statut_emp || emp.statut || "Actif";
+                const statusBadgeClass = getStatusColorClass(currentStatus);
+
+                row.innerHTML = `
+                    <td class="py-3 px-6 font-bold text-gray-400">${empId}</td>
+                    <td class="py-3 px-6 text-corporate font-bold">${emp.matricule_emp}</td>
+                    <td class="py-3 px-6 uppercase font-sans font-bold">${emp.nom_emp} ${emp.prenom_emp}</td>
+                    <td class="py-3 px-6 text-gray-500">${emp.cin_emp}</td>
+                    <td class="py-3 px-6"><span class="bg-blue-50 text-corporate px-2 py-0.5 rounded-sm text-[10px] font-bold">${emp.libelle_cat || 'Personnel'}</span></td>
+                    <td class="py-3 px-6"><span class="border px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider ${statusBadgeClass}">${currentStatus}</span></td>
+                    <td class="py-3 px-6 text-center space-x-1 whitespace-nowrap">
+                        <button onclick="viewEmployeeDetails(${empId})" class="text-slate-600 hover:text-slate-700 border border-slate-200 px-2 py-1 rounded-sm bg-slate-50/50 hover:bg-slate-50 text-[11px]"><i class="fas fa-eye"></i></button>
+                        <button onclick="generateBadge('${emp.matricule_emp}', '${emp.nom_emp.replace(/'/g, "\\'") || ''} ${emp.prenom_emp.replace(/'/g, "\\'") || ''}', '${emp.libelle_cat || 'Personnel'}', '${currentStatus}', '${emp.photo_emp || ''}')" class="text-emerald-600 hover:text-emerald-700 border border-emerald-200 px-2 py-1 rounded-sm bg-emerald-50/50 hover:bg-emerald-50 text-[11px]"><i class="fas fa-id-card"></i></button>
+                        <button onclick="initiateUpdate(${empId})" class="text-blue-600 hover:text-blue-700 border border-blue-200 px-2.5 py-1 rounded-sm bg-blue-50/50 hover:bg-blue-50 text-[11px]"><i class="fas fa-edit"></i></button>
+                        <button onclick="initiateArchive('${emp.matricule_emp}', '${emp.nom_emp} ${emp.prenom_emp}')" class="text-red-600 hover:text-red-700 border border-red-200 px-2.5 py-1 rounded-sm bg-red-50/50 hover:bg-red-50 text-[11px]"><i class="fas fa-archive"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function initiateUpdate(empId) {
+            const emp = localEmployeesList.find(e => (e.id_emp || e.id) == empId);
+            if (!emp) return;
+
+            currentEditId = empId; 
+            
+            // Sauvegarde de l'ancienne date d'embauche pour qu'elle ne bouge pas
+            currentEditDateEmbauche = emp.date_embauche ? emp.date_embauche.split('T')[0] : new Date().toISOString().split('T')[0];
+            // Chargement de sa photo existante si elle existe déjà en BDD
+            currentEmployeePhotoBase64 = emp.photo_emp || "";
+
+            inputMatricule.value = emp.matricule_emp;
+            inputMatricule.setAttribute('disabled', true); 
+            document.getElementById('nom_emp').value = emp.nom_emp || '';
+            document.getElementById('prenom_emp').value = emp.prenom_emp || '';
+            document.getElementById('cin_emp').value = emp.cin_emp || '';
+            if (emp.date_naiss_emp) document.getElementById('date_naiss_emp').value = emp.date_naiss_emp.split('T')[0];
+            document.getElementById('sexe_emp').value = emp.sexe_emp || '';
+            document.getElementById('adresse_emp').value = emp.adresse_emp || '';
+            document.getElementById('tel_emp').value = emp.tel_emp || emp.telephone || '';
+            selectStatut.value = emp.statut_emp || emp.statut || 'Actif';
+            inputPhotoEmp.value = ""; // Réinitialiser le sélecteur d'IHM de fichier physique
+
+            fetchCategoriesList().then(() => { selectCategorie.value = emp.id_categorie || ''; });
+
+            formModeTitle.innerText = `Modification Fiche Technique // Agent ID: ${empId}`;
+            btnSubmitForm.innerText = "Mettre à jour l'Agent //";
+            formContainer.classList.remove('hidden');
+        }
+
+        function initiateArchive(matricule, fullname) {
+            if (confirm(`Voulez-vous archiver l'employé ${fullname} ?`)) {
+                fetch(`http://localhost:3005/api/employes/archive/${matricule}`, { method: 'PUT' }).then(() => fetchEmployeesList());
+            }
+        }
+
+        // --- INTERFACES GLOBALES ET ROUTAGE IHM ---
+
+        function activateRoute(activeLink, viewToShow, titleText, subtitleText) {
+            document.querySelectorAll('#sidebar-nav .nav-item').forEach(link => {
+                link.classList.remove('bg-blue-950', 'text-white', 'border-l-4', 'border-blue-500');
+                link.classList.add('text-blue-200', 'border-transparent');
+            });
+            activeLink.classList.add('bg-blue-950', 'text-white', 'border-l-4', 'border-blue-500');
+
+            viewDashboard.classList.add('hidden');
+            viewEmployees.classList.add('hidden');
+            viewCategories.classList.add('hidden');
+            viewToShow.classList.remove('hidden');
+
+            mainTitle.innerText = titleText;
+            mainSubtitle.innerText = subtitleText;
+        }
+
+        navDashboard.addEventListener('click', (e) => { e.preventDefault(); activateRoute(navDashboard, viewDashboard, 'Console de Contrôle', 'Statut système : en ligne // Analyse en temps réel'); });
+        navEmployees.addEventListener('click', (e) => { e.preventDefault(); activateRoute(navEmployees, viewEmployees, 'Registre du Personnel //', 'Registre matriculaire central des agents actifs'); fetchEmployeesList(); fetchCategoriesList(); });
+        navCategories.addEventListener('click', (e) => { e.preventDefault(); activateRoute(navCategories, viewCategories, 'Grille des Catégories //', 'Configuration des paliers professionnels'); fetchCategoriesList(); });
+
+        btnTriggerForm.addEventListener('click', () => {
+            currentEditId = null; currentEditDateEmbauche = null; currentEmployeePhotoBase64 = "";
+            formEmploye.reset(); inputPhotoEmp.value = ""; inputMatricule.removeAttribute('disabled');
+            formModeTitle.innerText = "Enrôlement Agent // Données d'identification";
+            btnSubmitForm.innerText = "Enregistrer l'Agent";
+            formContainer.classList.remove('hidden');
+            generateNextMatricule(); 
+        });
+
+        btnCancelForm.addEventListener('click', () => { formContainer.classList.add('hidden'); currentEditId = null; });
+        btnCloseBadge.addEventListener('click', () => badgeModal.classList.add('hidden'));
+        btnCloseDetails.addEventListener('click', () => detailsModal.classList.add('hidden'));
+        btnCloseDetailsX.addEventListener('click', () => detailsModal.classList.add('hidden'));
+        searchInput.addEventListener('input', (e) => renderTableRows(e.target.value.toLowerCase().trim()));
+
+        function generateBadge(matricule, fullname, categoryName, status, base64Photo) {
+            document.getElementById('badge-target-name').innerText = fullname.toUpperCase();
+            document.getElementById('badge-target-cat').innerText = categoryName;
+            document.getElementById('badge-target-matricule').innerText = matricule;
+            const statusPill = document.getElementById('badge-target-statut-pill');
+            statusPill.innerText = status.toUpperCase();
+            statusPill.className = `border px-2 py-0.5 rounded-sm text-[9px] font-black uppercase ${getStatusColorClass(status)}`;
+
+            // Gestion de l'affichage de la photo dynamique sur le badge
+            const placeholder = document.getElementById('badge-photo-placeholder');
+            const imgEl = document.getElementById('badge-photo-img');
+            if (base64Photo && base64Photo.trim() !== "") {
+                imgEl.src = base64Photo;
+                imgEl.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+
+            const qrContainer = document.getElementById('badge-qrcode-area');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { text: `http://localhost:3005/api/employes/${matricule}`, width: 80, height: 80, colorDark: "#041E56", colorLight: "#ffffff" });
+            badgeModal.classList.remove('hidden');
+        }
+
+        function viewEmployeeDetails(empId) {
+            const emp = localEmployeesList.find(e => (e.id_emp || e.id) == empId);
+            if (!emp) return;
+            const modalBody = document.getElementById('details-modal-body');
+            
+            // Structure d'image adaptative pour la modal details
+            let photoSnippet = `<div class="w-full h-24 bg-gray-200 flex items-center justify-center border border-gray-300 text-[10px] text-gray-400 font-bold">PAS DE PHOTO</div>`;
+            if(emp.photo_emp) {
+                photoSnippet = `<img src="${emp.photo_emp}" class="w-full h-24 object-cover border-2 border-corporate shadow-sm rounded-sm" alt="Photo Agent">`;
+            }
+
+            modalBody.innerHTML = `
+                <div class="col-span-1 flex flex-col items-center justify-center border-r border-gray-200 pr-2">
+                    ${photoSnippet}
+                </div>
+                <div class="col-span-2 grid grid-cols-1 gap-2 pl-1">
+                    <div><span class="text-gray-400 block text-[9px] font-bold">Matricule / Date Embauche :</span><span class="font-bold text-corporate">${emp.matricule_emp}</span> <span class="text-gray-500 text-[10px]">(${emp.date_embauche ? emp.date_embauche.split('T')[0] : '--'})</span></div>
+                    <div><span class="text-gray-400 block text-[9px] font-bold">CIN :</span><span class="font-bold">${emp.cin_emp}</span></div>
+                    <div><span class="text-gray-400 block text-[9px] font-bold">Nom Complet :</span><span class="font-bold uppercase">${emp.nom_emp} ${emp.prenom_emp}</span></div>
+                    <div><span class="text-gray-400 block text-[9px] font-bold">Adresse :</span><span class="font-bold text-gray-700">${emp.adresse_emp}</span></div>
+                    <div><span class="text-gray-400 block text-[9px] font-bold">Statut :</span><span class="border px-2 py-0.5 text-[10px] font-black uppercase ${getStatusColorClass(emp.statut_emp)}">${emp.statut_emp || 'Actif'}</span></div>
+                </div>
+            `;
+            detailsModal.classList.remove('hidden');
+        }
+
+        // Chargement initial
+        fetchCategoriesList();
+    </script>
+</body>
+</html>

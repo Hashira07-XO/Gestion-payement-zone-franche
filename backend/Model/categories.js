@@ -3,11 +3,11 @@ import db from '../config/database.js'
 class Categorie {
     constructor(libelle, taux_horaire, heure_deb, heure_fin, type_paie)
     {
-        this.libelle = libelle,
-        this.taux_horaire = taux_horaire,
-        this.heure_deb = heure_deb,
-        this.heure_fin = heure_fin,
-        this.type_paie = type_paie
+        this.libelle = libelle;
+        this.taux_horaire = taux_horaire;
+        this.heure_deb = heure_deb;
+        this.heure_fin = heure_fin;
+        this.type_paie = type_paie;
     }
 
     static async createCategorie(nouvelleCategorie)
@@ -36,7 +36,7 @@ class Categorie {
     static async readCategorie()
     {
         const query = "SELECT * FROM categories";
-        const resultat = db.query(query);
+        const resultat = await db.query(query);
         return resultat;
     }
 
@@ -70,13 +70,18 @@ class Categorie {
     {
         const query = `UPDATE categories SET existe = 0 WHERE id_categorie = ?`;
         const [resultat] = await db.query(query, id_categorie);
+        const queryEmploye = `UPDATE employes SET statut_emp = 'En congé' WHERE id_categorie = ?`;
+        const resultatEmploye = await db.query(queryEmploye, id_categorie)
         return resultat;
     }
 
-    static async restoreCategorie(id_categerie)
+    static async restoreCategorie(id_categorie)
     {
         const query = `UPDATE categories SET existe = 1 WHERE id_categorie = ?`;
-        const [resultat] = await db.query(query, id_categerie);
+        const [resultat] = await db.query(query, id_categorie);
+        const queryEmploye = `UPDATE employes SET statut_emp = 'Actif' WHERE id_categorie = ?`;
+        const [resultatEmploye] = await db.query(queryEmploye, id_categorie);
+        console.log(resultatEmploye);
         return resultat;
     }
 }
