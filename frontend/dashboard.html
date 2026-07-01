@@ -87,6 +87,28 @@
             #print-zone-target button {
                 display: none !important;
             }
+            #details-modal, #details-modal * {
+                visibility: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            #details-modal {
+                position: absolute !important;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: 90% !important;
+                max-width: 700px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                box-shadow: none !important;
+                border: none !important;
+                display: block !important;
+            }
+            #details-modal .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -417,8 +439,9 @@
                 <button id="btn-close-details-x" class="text-gray-400 hover:text-gray-600 font-bold text-base">&times;</button>
             </div>
             <div class="grid grid-cols-3 gap-4 bg-gray-50 p-4 border border-gray-200 rounded-sm" id="details-modal-body"></div>
-            <div class="flex justify-end mt-5 pt-3 border-t border-gray-200">
-                <button id="btn-close-details" class="bg-corporate text-white font-mono text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-sm hover:bg-opacity-90">Fermer</button>
+            <div class="flex justify-end gap-2 mt-5 pt-3 border-t border-gray-200 no-print">
+                <button type="button" id="btn-print-details" class="bg-emerald-600 text-white font-mono text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-sm hover:bg-emerald-700">Imprimer la fiche</button>
+                <button type="button" id="btn-close-details" class="bg-corporate text-white font-mono text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-sm hover:bg-opacity-90">Fermer</button>
             </div>
         </div>
     </div>
@@ -642,7 +665,7 @@ formCategory.addEventListener('submit', function(e) {
         libelle: document.getElementById('libelle').value,
         taux_horaire: parseInt(document.getElementById('taux_horaire').value, 10),
         heure_deb: document.getElementById('heure_deb').value,
-        heure_fin_prev: document.getElementById('heure_fin').value,
+        heure_fin: document.getElementById('heure_fin').value,
         type_paie: document.getElementById('type_paie').value
     };
 
@@ -759,6 +782,9 @@ function renderTableRows(filterQuery = "") {
         const empId = emp.id_emp || emp.id;
         const currentStatus = emp.statut_emp || emp.statut || "Actif";
         const imgData = emp.photo_url || emp.photo_emp;
+        const fullName = `${(emp.nom_emp || '').replace(/'/g, "\\'")} ${(emp.prenom_emp || '').replace(/'/g, "\\'")}`.trim();
+        const categoryName = (emp.libelle_cat || 'Personnel').replace(/'/g, "\\'");
+        const photoValue = (imgData || '').replace(/'/g, "\\'");
 
         row.innerHTML = `
             <td class="py-3 px-6 font-bold text-gray-400">${empId}</td>
@@ -769,7 +795,7 @@ function renderTableRows(filterQuery = "") {
             <td class="py-3 px-6"><span class="border px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider ${getStatusColorClass(currentStatus)}">${currentStatus}</span></td>
             <td class="py-3 px-6 text-center space-x-1 whitespace-nowrap">
                 <button onclick="viewEmployeeDetails(${empId})" class="text-slate-600 border border-slate-200 px-2 py-1 bg-slate-50 text-[11px]"><i class="fas fa-eye"></i></button>
-                <button onclick="generateBadge('${emp.matricule_emp}', '${emp.nom_emp.replace(/'/g, "\\'")}' '${emp.prenom_emp.replace(/'/g, "\\'")}' , '${emp.libelle_cat || 'Personnel'}', '${currentStatus}', '${imgData || ''}')" class="text-emerald-600 border border-emerald-200 px-2 py-1 bg-emerald-50 text-[11px]"><i class="fas fa-id-card"></i></button>
+                <button onclick="generateBadge('${emp.matricule_emp}', '${fullName}', '${categoryName}', '${currentStatus}', '${photoValue}')" class="text-emerald-600 border border-emerald-200 px-2 py-1 bg-emerald-50 text-[11px]"><i class="fas fa-id-card"></i></button>
                 <button onclick="initiateUpdate(${empId})" class="text-blue-600 border border-blue-200 px-2.5 py-1 bg-blue-50 text-[11px]"><i class="fas fa-edit"></i></button>
                 <button onclick="initiateArchive('${emp.matricule_emp}')" class="text-red-600 border border-red-200 px-2.5 py-1 bg-red-50 text-[11px]"><i class="fas fa-archive"></i></button>
             </td>
@@ -845,14 +871,21 @@ document.getElementById('btn-close-details-x').addEventListener('click', () => d
 document.getElementById('employee-search-input').addEventListener('input', (e) => renderTableRows(e.target.value.toLowerCase().trim()));
 
 // Imprimer depuis la modal détails
-btnPrintDetails.addEventListener('click', () => {
-    if (currentViewedEmployeeId) {
-        const emp = localEmployeesList.find(e => (e.id_emp || e.id) == currentViewedEmployeeId);
-        if (emp) imprimerFicheEmploye(emp);
-    }
-});
+if (btnPrintDetails) {
+    btnPrintDetails.addEventListener('click', () => {
+        if (currentViewedEmployeeId) {
+            const emp = localEmployeesList.find(e => (e.id_emp || e.id) == currentViewedEmployeeId);
+            if (emp) imprimerFicheEmploye(emp);
+        }
+    });
+}
 
 // --- BADGE ET DETAILS ---
+function imprimerFicheEmploye(emp) {
+    if (!emp) return;
+    window.print();
+}
+
 function generateBadge(matricule, fullname, categoryName, status, photoRawData) {
     document.getElementById('badge-target-name').innerText = fullname.toUpperCase();
     document.getElementById('badge-target-cat').innerText = categoryName;
